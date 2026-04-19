@@ -5,9 +5,7 @@ import com.SpringRestAPI.Models.ProductCategories;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class ProductService {
@@ -29,9 +27,10 @@ public class ProductService {
     }
 
     // add a new product
-    public boolean addNewProduct(String productName, double productPrice, ProductCategories productCategory, int productQuantity) {
-        productList.add(new Product(productName, productPrice, productCategory, productQuantity));
-        return true;
+    public Product addNewProduct(String productName, double productPrice, ProductCategories productCategory, int productQuantity) {
+        Product newProduct = new Product(productName, productPrice, productCategory, productQuantity);
+        productList.add(newProduct);
+        return newProduct;
     }
 
     // get all products
@@ -43,7 +42,7 @@ public class ProductService {
     public List<Product> getProductByName(String productName) {
         List<Product> products = new ArrayList<>();
         for (Product product : productList) {
-            if (product.getProductName().equals(productName)) {
+            if (product.getProductName().equalsIgnoreCase(productName)) {
                 products.add(product);
             }
         }
@@ -54,7 +53,7 @@ public class ProductService {
     public Product updateProductName(String currentName, String newName) {
         for (Product product : productList) {
             if (product.getProductName().equalsIgnoreCase(currentName)) {
-                product.setProductName();
+                product.setProductName(newName);
                 return product;
             }
         }

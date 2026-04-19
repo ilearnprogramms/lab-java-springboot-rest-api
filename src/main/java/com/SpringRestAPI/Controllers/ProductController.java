@@ -21,7 +21,7 @@ public class ProductController {
 
     // Create new product
     @PostMapping("/products/{productName}/{productPrice}/{productCategory}/{productQuantity}") // http://localhost:8080/api/products/
-    public boolean addNewProduct(@PathVariable String productName, @PathVariable double productPrice, @PathVariable ProductCategories productCategory, @PathVariable int productQuantity) {
+    public Product addNewProduct(@PathVariable String productName, @PathVariable double productPrice, @PathVariable ProductCategories productCategory, @PathVariable int productQuantity) {
         Logger myLogger = Logger.getLogger("ProductController");
         myLogger.info("Create a new Product");
 
@@ -46,7 +46,7 @@ public class ProductController {
         return productService.getProductByName(productName);
     }
 
-    // change product name TODO
+    // change product name
     @PutMapping("/products/{productName}/{newName}") // http://localhost:8080/api/products/{name}/{newName}
     public Product getProductByName(@PathVariable String productName, @PathVariable String newName) {
         Logger myLogger = Logger.getLogger(" by Name");

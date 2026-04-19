@@ -18,9 +18,9 @@ public class Customer {
         return customerName;
     }
 
-    public void setCustomerName() {
-        if (customerName.isEmpty()) {
-            System.out.println("Customer name is cannot be empty");
+    public void setCustomerName(String customerName) {
+        if (customerName == null || customerName.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer name is cannot be empty");
         }
         else {
             this.customerName = customerName;
@@ -32,10 +32,11 @@ public class Customer {
     }
 
     public void setCustomerEmail(String customerEmail) {
-        if (!customerEmail.contains("@") ||
+        if (customerEmail == null ||
+            !customerEmail.contains("@") ||
             !customerEmail.contains(".") ||
             customerEmail.contains(" ")) {
-            System.out.println("Customer email is invalid");
+            throw new IllegalArgumentException("Customer email is invalid");
         } else {
             this.customerEmail = customerEmail;
         }
@@ -47,7 +48,7 @@ public class Customer {
 
     public void setCustomerAge(int customerAge) {
         if (customerAge < 18) {
-            System.out.println("Sorry, you must be at least 18!");
+            throw new IllegalArgumentException("Sorry, you must be at least 18!");
         } else {
             this.customerAge = customerAge;
         }
@@ -58,10 +59,20 @@ public class Customer {
     }
 
     public void setCustomerAddress(String customerAddress) {
-        if (customerAddress.isEmpty()) {
-            System.out.println("Customer address is cannot be empty");
+        if (customerAddress == null || customerAddress.trim().isEmpty()) {
+            throw new IllegalArgumentException("Customer address is cannot be empty");
         } else {
             this.customerAddress = customerAddress;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "customerName='" + customerName + '\'' +
+                ", customerEmail='" + customerEmail + '\'' +
+                ", customerAge=" + customerAge +
+                ", customerAddress='" + customerAddress + '\'' +
+                '}';
     }
 }

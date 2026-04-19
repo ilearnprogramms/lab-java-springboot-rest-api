@@ -18,12 +18,12 @@ public class Product {
         return productName;
     }
 
-    public void setProductName() {
-        if (productName.length() >= 3) {
+    public void setProductName(String productName) {
+        if (productName !=null && productName.trim().length() >= 3) {
             this.productName = productName;
         }
         else  {
-            System.out.println("Product name must contain at least 3 characters.");
+            throw new IllegalArgumentException("Product name must contain at least 3 characters.");
         }
     }
 
@@ -32,11 +32,11 @@ public class Product {
     }
 
     public void setProductPrice(double productPrice) {
-        if (productPrice >= 0) {
+        if (productPrice > 0) {
             this.productPrice = productPrice;
         }
         else  {
-            System.out.println("Product price cannot be negative.");
+            throw new IllegalArgumentException("Product price cannot be negative.");
         }
     }
 
@@ -49,7 +49,7 @@ public class Product {
             this.productCategory = productCategory;
         }
         else {
-            System.out.println("Product category cannot be empty.");
+            throw new IllegalArgumentException("Product category cannot be empty.");
         }
     }
 
@@ -58,11 +58,11 @@ public class Product {
     }
 
     public void setProductQuantity(int productQuantity) {
-        if (productQuantity >= 0) {
+        if (productQuantity > 0) {
             this.productQuantity = productQuantity;
         }
         else  {
-            System.out.println("Product quantity cannot be negative.");
+            throw new IllegalArgumentException("Product quantity cannot be negative.");
         }
     }
 

@@ -1,9 +1,7 @@
 package com.SpringRestAPI.Services;
 
 import com.SpringRestAPI.Models.Customer;
-import com.SpringRestAPI.Models.Product;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,11 +28,17 @@ public class CustomerService {
         return customers;
     }
 
+    // add new customer
+    public String addNewCustomer(String customerName, String customerEmail, int customerAge, String customerAddress) {
+        customers.add(new Customer(customerName, customerEmail, customerAge, customerAddress));
+        return "new customer added";
+    }
+
     // get customer by email
     public List<Customer> getCustomerByEmail(String email) {
         List<Customer> customerList = new ArrayList<>();
         for (Customer customer : customers) {
-            if (customer.getCustomerEmail().equals(email)) {
+            if (customer.getCustomerEmail().equalsIgnoreCase(email)) {
                 customerList.add(customer);
             }
         }
@@ -45,12 +49,23 @@ public class CustomerService {
     public Customer updateCustomerName(String currentName, String newName) {
         for (Customer customer : customers) {
             if (customer.getCustomerName().equalsIgnoreCase(currentName)) {
-                customer.setCustomerName();
+                customer.setCustomerName(newName);
                 return customer;
             }
         }
-        throw new RuntimeException("Product not found");
+        throw new RuntimeException("Customer not found");
     }
+
+    // delete customer
+    public List<Customer> deleteCustomer (String customerName){
+        for (Customer customer : customers) {
+            if (customer.getCustomerName().equals(customerName)) {
+                customers.remove(customer);
+            }
+        }
+        return customers;
+    }
+
 
 
 
