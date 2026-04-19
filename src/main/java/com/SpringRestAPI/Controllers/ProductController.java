@@ -20,17 +20,31 @@ public class ProductController {
     }
 
     // Create new product
-    @PostMapping("/products/{productName}/{productPrice}/{productCategory}/{productQuantity}") // http://localhost:8080/api/products/
-    public Product addNewProduct(@PathVariable String productName, @PathVariable double productPrice, @PathVariable ProductCategories productCategory, @PathVariable int productQuantity) {
+    @PostMapping("/products") // http://localhost:8080/api/products/
+    public Product addNewProduct(
+            @RequestHeader("API-Key") String apiKey,
+            @RequestBody Product product
+            ) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
         Logger myLogger = Logger.getLogger("ProductController");
         myLogger.info("Create a new Product");
 
-        return productService.addNewProduct(productName, productPrice, productCategory, productQuantity);
+        return productService.addNewProduct(
+                product.getProductName(),
+                product.getProductPrice(),
+                product.getProductCategory(),
+                product.getProductQuantity()
+        );
     }
 
     // get all products
     @GetMapping("/products") // http://localhost:8080/api/products/
-    public List<Product> getAllProducts() {
+    public List<Product> getAllProducts(@RequestHeader("API-Key") String apiKey) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
         Logger myLogger = Logger.getLogger("ProductList");
         myLogger.info("Get all the Product list");
 
@@ -39,7 +53,12 @@ public class ProductController {
 
     // get all products by name
     @GetMapping("/products/{productName}") // http://localhost:8080/api/products/{name}
-    public List<Product> getProductByname(@PathVariable String productName) {
+    public List<Product> getProductByName(
+            @RequestHeader("API-Key") String apiKey,
+            @PathVariable String productName) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
         Logger myLogger = Logger.getLogger("ProductList by Name");
         myLogger.info("Get Product list by Name");
 
@@ -48,7 +67,13 @@ public class ProductController {
 
     // change product name
     @PutMapping("/products/{productName}/{newName}") // http://localhost:8080/api/products/{name}/{newName}
-    public Product getProductByName(@PathVariable String productName, @PathVariable String newName) {
+    public Product updateProductName(
+            @PathVariable String productName,
+            @PathVariable String newName,
+            @RequestHeader("API-Key") String apiKey) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
         Logger myLogger = Logger.getLogger(" by Name");
         myLogger.info("change Product Name");
 
@@ -57,7 +82,12 @@ public class ProductController {
 
     // delete product by name
     @DeleteMapping("/products/{productName}") // http://localhost:8080/api/products/{productName}
-    public List<Product> deleteProduct(@PathVariable String productName) {
+    public List<Product> deleteProduct(
+            @PathVariable String productName,
+            @RequestHeader("API-Key") String apiKey) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
         Logger myLogger = Logger.getLogger("ProductList by Name");
         myLogger.info("delete Product by Name");
 
@@ -66,7 +96,12 @@ public class ProductController {
 
     // get item by category
     @GetMapping("/products/category/{category}") // http://localhost:8080/api/products/category/{category}
-    public List<Product> getProductByCategory(@PathVariable ProductCategories category) {
+    public List<Product> getProductByCategory(
+            @PathVariable ProductCategories category,
+            @RequestHeader("API-Key") String apiKey) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
         Logger myLogger = Logger.getLogger("ProductList by Category");
         myLogger.info("get Product by Category");
 
@@ -74,18 +109,17 @@ public class ProductController {
     }
 
     // get products by price range
-    @GetMapping("/products/price/min{minPrice}/max{maxPrice}")
-    public List<Product> getProductsByPriceRange(@PathVariable Double minPrice, @PathVariable Double maxPrice) {
+    @GetMapping("/products/price")
+    public List<Product> getProductsByPriceRange(
+            @RequestParam double minPrice,
+            @RequestParam double maxPrice,
+            @RequestHeader("API-Key") String apiKey) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
         Logger myLogger = Logger.getLogger("ProductList by Price range");
         myLogger.info("get Product by Price range");
 
         return productService.getProductsByPriceRange(minPrice, maxPrice);
     }
-
-
-
-
-
-
-
 }

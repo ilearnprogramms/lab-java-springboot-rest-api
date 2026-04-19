@@ -19,13 +19,17 @@ public class CustomerController {
     }
 
     // create new customer
-    @PostMapping("/customer/{customerName}/{customerEmail}/{customerAge}/{customerAddress}")
-    public String addNewCustomer(@PathVariable String customerName, @PathVariable String customerEmail,@PathVariable int customerAge, @PathVariable String customerAddress ) {
+    @PostMapping("/customer")
+    public String addNewCustomer(@RequestBody Customer customer ) {
         Logger myLogger = Logger.getLogger("CustomerController new customer");
         myLogger.info("Adding new customer ");
 
-        return customerService.addNewCustomer(customerName, customerEmail, customerAge, customerAddress);
-
+        return customerService.addNewCustomer(
+                customer.getCustomerName(),
+                customer.getCustomerEmail(),
+                customer.getCustomerAge(),
+                customer.getCustomerAddress()
+        );
     }
 
     // get all customer
