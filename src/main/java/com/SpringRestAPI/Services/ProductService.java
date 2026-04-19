@@ -82,10 +82,10 @@ public class ProductService {
     }
 
     // get products by price range
-    public List<Product> getProductsByPriceRange (double minPrice, double maxPrice){
+    public List<Product> getProductsByPriceRange (double min, double max){
         List<Product> products = new ArrayList<>();
         for (Product product : productList) {
-            if (product.getProductPrice()>=minPrice&&product.getProductPrice()<=maxPrice) {
+            if (product.getProductPrice()>=min&&product.getProductPrice()<=max) {
                 products.add(product);
             }
         }

@@ -1,6 +1,5 @@
 package com.SpringRestAPI.Controllers;
 
-
 import com.SpringRestAPI.Models.Customer;
 import com.SpringRestAPI.Services.CustomerService;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +19,13 @@ public class CustomerController {
 
     // create new customer
     @PostMapping("/customer")
-    public String addNewCustomer(@RequestBody Customer customer ) {
+    public String addNewCustomer(
+            @RequestHeader("API-Key") String apiKey,
+            @RequestBody Customer customer ) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
+
         Logger myLogger = Logger.getLogger("CustomerController new customer");
         myLogger.info("Adding new customer ");
 
@@ -34,7 +39,12 @@ public class CustomerController {
 
     // get all customer
     @GetMapping("/customer")
-    public List<Customer> getCustomers() {
+    public List<Customer> getCustomers(
+            @RequestHeader("API-Key") String apiKey) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
+
         Logger myLogger = Logger.getLogger("CustomerService get all customers");
         myLogger.info("Getting all customers");
 
@@ -43,7 +53,13 @@ public class CustomerController {
 
     // get customer by email
     @GetMapping("/customer/{customerEmail}")
-    public List<Customer> getCustomers(@PathVariable String customerEmail) {
+    public List<Customer> getCustomers(
+            @RequestHeader("API-Key") String apiKey,
+            @PathVariable String customerEmail) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
+
         Logger myLogger = Logger.getLogger("CustomerService getting customer by email");
         myLogger.info("Getting customer by email");
 
@@ -52,7 +68,14 @@ public class CustomerController {
 
     // update customer name
     @PutMapping("/customer/{currentName}/{newName}")
-    public Customer updateCustomerName(@PathVariable String currentName, @PathVariable String newName) {
+    public Customer updateCustomerName(
+            @RequestHeader("API-Key") String apiKey,
+            @PathVariable String currentName,
+            @PathVariable String newName) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
+
         Logger myLogger = Logger.getLogger("CustomerController update customer name");
         myLogger.info("Updating customer name");
 
@@ -61,14 +84,16 @@ public class CustomerController {
 
     // delete customer
     @DeleteMapping("/customer/{customerName}")
-    public List<Customer> deleteCustomer(@PathVariable String customerName) {
+    public List<Customer> deleteCustomer(
+            @RequestHeader("API-Key") String apiKey,
+            @PathVariable String customerName) {
+        if (!"123456".equals(apiKey)) {
+            throw new RuntimeException("Invalid API Key");
+        }
+
         Logger myLogger = Logger.getLogger("CustomerController delete customer name");
         myLogger.info("Deleting customer name");
 
         return customerService.deleteCustomer(customerName);
     }
-
-
-
-
 }

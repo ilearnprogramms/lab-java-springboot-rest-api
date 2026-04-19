@@ -1,8 +1,13 @@
 package com.SpringRestAPI.Controllers;
 
+import com.SpringRestAPI.Exceptions.InvalidPriceRangeException;
+import com.SpringRestAPI.Exceptions.MissingApiKeyException;
+import com.SpringRestAPI.Exceptions.ProductNotFoundException;
 import com.SpringRestAPI.Models.Product;
 import com.SpringRestAPI.Models.ProductCategories;
 import com.SpringRestAPI.Services.ProductService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +31,7 @@ public class ProductController {
             @RequestBody Product product
             ) {
         if (!"123456".equals(apiKey)) {
-            throw new RuntimeException("Invalid API Key");
+            throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
         Logger myLogger = Logger.getLogger("ProductController");
         myLogger.info("Create a new Product");
@@ -43,7 +48,7 @@ public class ProductController {
     @GetMapping("/products") // http://localhost:8080/api/products/
     public List<Product> getAllProducts(@RequestHeader("API-Key") String apiKey) {
         if (!"123456".equals(apiKey)) {
-            throw new RuntimeException("Invalid API Key");
+            throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
         Logger myLogger = Logger.getLogger("ProductList");
         myLogger.info("Get all the Product list");
@@ -52,17 +57,25 @@ public class ProductController {
     }
 
     // get all products by name
-    @GetMapping("/products/{productName}") // http://localhost:8080/api/products/{name}
-    public List<Product> getProductByName(
-            @RequestHeader("API-Key") String apiKey,
+    @GetMapping("/products/{productName}")
+    public ResponseEntity<?> getProductByName(
+            @RequestHeader(value="API-Key", required=false) String apiKey,
             @PathVariable String productName) {
-        if (!"123456".equals(apiKey)) {
-            throw new RuntimeException("Invalid API Key");
-        }
-        Logger myLogger = Logger.getLogger("ProductList by Name");
-        myLogger.info("Get Product list by Name");
+        try {
+            if (!"123456".equals(apiKey)) {
+                throw new MissingApiKeyException("API-Key header is missing or invalid");
+            }
+            List<Product> products = productService.getProductByName(productName);
+            if (products.isEmpty()) {
+                throw new ProductNotFoundException("No product found with that name");
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(products);
 
-        return productService.getProductByName(productName);
+        } catch (MissingApiKeyException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API-Key header is missing or invalid");
+        } catch (ProductNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No product found with that name");
+        }
     }
 
     // change product name
@@ -72,7 +85,7 @@ public class ProductController {
             @PathVariable String newName,
             @RequestHeader("API-Key") String apiKey) {
         if (!"123456".equals(apiKey)) {
-            throw new RuntimeException("Invalid API Key");
+            throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
         Logger myLogger = Logger.getLogger(" by Name");
         myLogger.info("change Product Name");
@@ -86,7 +99,7 @@ public class ProductController {
             @PathVariable String productName,
             @RequestHeader("API-Key") String apiKey) {
         if (!"123456".equals(apiKey)) {
-            throw new RuntimeException("Invalid API Key");
+            throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
         Logger myLogger = Logger.getLogger("ProductList by Name");
         myLogger.info("delete Product by Name");
@@ -110,16 +123,31 @@ public class ProductController {
 
     // get products by price range
     @GetMapping("/products/price")
-    public List<Product> getProductsByPriceRange(
-            @RequestParam double minPrice,
-            @RequestParam double maxPrice,
-            @RequestHeader("API-Key") String apiKey) {
-        if (!"123456".equals(apiKey)) {
-            throw new RuntimeException("Invalid API Key");
-        }
-        Logger myLogger = Logger.getLogger("ProductList by Price range");
-        myLogger.info("get Product by Price range");
+    public ResponseEntity<?> getProductsByPriceRange(
+            @RequestParam double min,
+            @RequestParam double max,
+            @RequestHeader(value="API-Key", required=false) String apiKey) {
 
-        return productService.getProductsByPriceRange(minPrice, maxPrice);
+        try {
+            if (!"123456".equals(apiKey)) {
+                throw new MissingApiKeyException("API-Key header is missing or invalid");
+            }
+            if (min > max) {
+                throw new InvalidPriceRangeException("Min price cannot be greater than max price");
+            }
+            List<Product> products = productService.getProductsByPriceRange(min, max);
+            if  (products == null || products.isEmpty()) {
+                throw new ProductNotFoundException("No product found in this price range");
+            }
+            return ResponseEntity.status(HttpStatus.OK).body(products);
+
+        } catch (MissingApiKeyException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API-Key header is missing or invalid");
+        } catch (InvalidPriceRangeException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Min price cannot be greater than max price");
+        } catch (ProductNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No product found in this price range");
+        }
+
     }
 }
