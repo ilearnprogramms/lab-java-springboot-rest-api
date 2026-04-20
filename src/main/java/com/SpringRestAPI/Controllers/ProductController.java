@@ -6,7 +6,10 @@ import com.SpringRestAPI.Exceptions.ProductNotFoundException;
 import com.SpringRestAPI.Models.Product;
 import com.SpringRestAPI.Models.ProductCategories;
 import com.SpringRestAPI.Services.ProductService;
-import org.springframework.http.HttpStatus;
+import jakarta.validation.Valid;
+// @Valid Annotations provide a consistent approach to validation, which improves readability and maintainability.
+// It gives you automatic error feedback to the client, indicating exactly which fields are incorrect and why.
+// @Valid is used for incoming data validation. Like 'Post' and 'Put' requests. It's not needed for others.
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,8 +31,7 @@ public class ProductController {
     @PostMapping("/products") // http://localhost:8080/api/products/
     public Product addNewProduct(
             @RequestHeader("API-Key") String apiKey,
-            @RequestBody Product product
-            ) {
+            @Valid @RequestBody Product product ) {
         if (!"123456".equals(apiKey)) {
             throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
@@ -56,32 +58,22 @@ public class ProductController {
         return productService.getProductList();
     }
 
-    // get all products by name
+    // Get product by name
     @GetMapping("/products/{productName}")
-    public ResponseEntity<?> getProductByName(
-            @RequestHeader(value="API-Key", required=false) String apiKey,
+    public Product getProductByName(
+            @RequestHeader(value="API-Key") String apiKey,
             @PathVariable String productName) {
-        try {
-            if (!"123456".equals(apiKey)) {
-                throw new MissingApiKeyException("API-Key header is missing or invalid");
-            }
-            List<Product> products = productService.getProductByName(productName);
-            if (products.isEmpty()) {
-                throw new ProductNotFoundException("No product found with that name");
-            }
-            return ResponseEntity.status(HttpStatus.OK).body(products);
-
-        } catch (MissingApiKeyException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API-Key header is missing or invalid");
-        } catch (ProductNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No product found with that name");
+        if (!"123456".equals(apiKey)) {
+            throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
+        return productService.getProductByName(productName)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
     // change product name
     @PutMapping("/products/{productName}/{newName}") // http://localhost:8080/api/products/{name}/{newName}
     public Product updateProductName(
-            @PathVariable String productName,
+            @Valid @PathVariable String productName,
             @PathVariable String newName,
             @RequestHeader("API-Key") String apiKey) {
         if (!"123456".equals(apiKey)) {
@@ -95,16 +87,17 @@ public class ProductController {
 
     // delete product by name
     @DeleteMapping("/products/{productName}") // http://localhost:8080/api/products/{productName}
-    public List<Product> deleteProduct(
+    public Product deleteProduct(
             @PathVariable String productName,
             @RequestHeader("API-Key") String apiKey) {
         if (!"123456".equals(apiKey)) {
             throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
         Logger myLogger = Logger.getLogger("ProductList by Name");
-        myLogger.info("delete Product by Name");
+        myLogger.info("delete Product by Name" +  productName);
 
-        return productService.deleteProduct(productName);
+        return productService.deleteProduct(productName)
+                .orElseThrow(() -> new ProductNotFoundException("Product not found"));
     }
 
     // get item by category
@@ -122,32 +115,58 @@ public class ProductController {
     }
 
     // get products by price range
-    @GetMapping("/products/price")
-    public ResponseEntity<?> getProductsByPriceRange(
-            @RequestParam double min,
-            @RequestParam double max,
-            @RequestHeader(value="API-Key", required=false) String apiKey) {
-
-        try {
-            if (!"123456".equals(apiKey)) {
-                throw new MissingApiKeyException("API-Key header is missing or invalid");
-            }
-            if (min > max) {
-                throw new InvalidPriceRangeException("Min price cannot be greater than max price");
-            }
-            List<Product> products = productService.getProductsByPriceRange(min, max);
-            if  (products == null || products.isEmpty()) {
-                throw new ProductNotFoundException("No product found in this price range");
-            }
-            return ResponseEntity.status(HttpStatus.OK).body(products);
-
-        } catch (MissingApiKeyException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("API-Key header is missing or invalid");
-        } catch (InvalidPriceRangeException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Min price cannot be greater than max price");
-        } catch (ProductNotFoundException ex) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No product found in this price range");
+    @GetMapping("/products/price") // http://localhost:8080/api/products/price?min=10&max=30
+    public ResponseEntity<List<Product>> getProductsByPriceRange(
+            @RequestParam double min, // @RequestParam is /price > ?min=VALUE
+            @RequestParam double max, // &max=VALUE
+            @RequestHeader(value="API-Key") String apiKey) {
+        // Check API Key presence and validity
+        if (!"123456".equals(apiKey)) {
+            throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
+        // Check for valid price range
+        if (min > max) {
+            throw new InvalidPriceRangeException("Min price cannot be greater than max price");
+        }
+        // Business logic to find products by price range
+        List<Product> products = productService.getProductsByPriceRange(min, max);
 
+        if (products == null || products.isEmpty()) {
+            throw new ProductNotFoundException("No product found in this price range");
+        }
+        return ResponseEntity.ok(products);
     }
+
+///    IF YOU ARE READING THIS
+///    MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW
+///    MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW
+///    MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW
+///    MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW
+///    MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW
+///    MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW
+///    MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW MEOW
+
+    /*
+             ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⡷⣄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⡿⠋⠈⠻⣮⣳⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣴⣾⡿⠋⠀⠀⠀⠀⠙⣿⣿⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⣶⣿⡿⠟⠛⠉⠀⠀⠀⠀⠀⠀⠀⠈⠛⠛⠿⠿⣿⣷⣶⣤⣄⣀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣴⣾⡿⠟⠋⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠛⠻⠿⣿⣶⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+            ⠀⠀⠀⣀⣠⣤⣤⣀⡀⠀⠀⣀⣴⣿⡿⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠿⣿⣷⣦⣄⡀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣤⣄⠀⠀
+            ⢀⣤⣾⡿⠟⠛⠛⢿⣿⣶⣾⣿⠟⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠿⣿⣷⣦⣀⣀⣤⣶⣿⡿⠿⢿⣿⡀⠀
+            ⣿⣿⠏⠀⢰⡆⠀⠀⠉⢿⣿⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠻⢿⡿⠟⠋⠁⠀⠀⢸⣿⠇⠀
+            ⣿⡟⠀⣀⠈⣀⡀⠒⠃⠀⠙⣿⡆⠀⠀⠀⠀⠀⠀⠀⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⠇⠀
+            ⣿⡇⠀⠛⢠⡋⢙⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⣿⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠀⠀
+            ⣿⣧⠀⠀⠀⠓⠛⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⠛⠋⠀⠀⢸⣧⣤⣤⣶⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢰⣿⡿⠀⠀
+            ⣿⣿⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠉⠻⣷⣶⣶⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣿⣿⠁⠀⠀
+            ⠈⠛⠻⠿⢿⣿⣷⣶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣴⣿⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣾⣿⡏⠀⠀⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠉⠙⠛⠻⠿⢿⣿⣷⣶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠙⠿⠛⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⢿⣿⡄⠀⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠙⠛⠻⠿⢿⣿⣷⣶⣦⣤⣄⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⣿⡄⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⠛⠿⠿⣿⣷⣶⣶⣤⣤⣀⡀⠀⠀⠀⢀⣴⡆⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢿⡿⣄
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠉⠛⠛⠿⠿⣿⣷⣶⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⣿⣹
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⠀⠀⠀⠀⠀⠀⢸⣧
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢻⣿⣆⠀⠀⠀⠀⠀⠀⢀⣀⣠⣤⣶⣾⣿⣿⣿⣿⣤⣄⣀⡀⠀⠀⠀⣿
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠻⢿⣻⣷⣶⣾⣿⣿⡿⢯⣛⣛⡋⠁⠀⠀⠉⠙⠛⠛⠿⣿⣿⡷⣶⣿
+     */
+
 }

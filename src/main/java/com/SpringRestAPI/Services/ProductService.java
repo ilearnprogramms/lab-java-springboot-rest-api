@@ -3,12 +3,13 @@ package com.SpringRestAPI.Services;
 import com.SpringRestAPI.Models.Product;
 import com.SpringRestAPI.Models.ProductCategories;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ProductService {
+
 
     private List<Product> productList;
 
@@ -39,14 +40,13 @@ public class ProductService {
     }
 
     // get products by name
-    public List<Product> getProductByName(String productName) {
-        List<Product> products = new ArrayList<>();
+    public Optional<Product> getProductByName(String productName) {
         for (Product product : productList) {
             if (product.getProductName().equalsIgnoreCase(productName)) {
-                products.add(product);
+                return Optional.of(product); // return if product found with the name in that list
             }
         }
-        return products;
+        return Optional.empty(); // if no product found by the name, it will return empty
     }
 
     // update product
@@ -61,13 +61,13 @@ public class ProductService {
     }
 
     // delete product
-    public List<Product> deleteProduct (String productName){
-        for (Product product : productList) {
-            if (product.getProductName().equals(productName)) {
-                productList.remove(product);
-            }
-        }
-        return productList;
+    public Optional<Product> deleteProduct(String productName) {
+        Optional<Product> found = productList.stream()
+                .filter(p -> p.getProductName().equals(productName))
+                .findFirst();
+
+        found.ifPresent(productList::remove);
+        return found;
     }
 
     // get products by category
@@ -91,5 +91,9 @@ public class ProductService {
         }
         return products;
     }
+
+    /// Product → “There is definitely a product”
+    /// Optional<Product> → “There might be a product”
+    /// List<Product> → “There could be many products”
 
 }

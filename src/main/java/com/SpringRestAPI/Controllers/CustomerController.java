@@ -1,9 +1,13 @@
 package com.SpringRestAPI.Controllers;
 
+import com.SpringRestAPI.Exceptions.MissingApiKeyException;
 import com.SpringRestAPI.Models.Customer;
 import com.SpringRestAPI.Services.CustomerService;
+import jakarta.validation.Valid;
+// @Valid Annotations provide a consistent approach to validation, which improves readability and maintainability.
+// It gives you automatic error feedback to the client, indicating exactly which fields are incorrect and why.
+// @Valid is used for incoming data validation. Like 'Post' and 'Put' requests. It's not needed for others.
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -19,13 +23,12 @@ public class CustomerController {
 
     // create new customer
     @PostMapping("/customer")
-    public String addNewCustomer(
+    public Customer addNewCustomer(
             @RequestHeader("API-Key") String apiKey,
-            @RequestBody Customer customer ) {
+            @Valid @RequestBody Customer customer ) {
         if (!"123456".equals(apiKey)) {
-            throw new RuntimeException("Invalid API Key");
+            throw new MissingApiKeyException("API-Key header is missing or invalid");
         }
-
         Logger myLogger = Logger.getLogger("CustomerController new customer");
         myLogger.info("Adding new customer ");
 
@@ -70,7 +73,7 @@ public class CustomerController {
     @PutMapping("/customer/{currentName}/{newName}")
     public Customer updateCustomerName(
             @RequestHeader("API-Key") String apiKey,
-            @PathVariable String currentName,
+            @Valid @PathVariable String currentName,
             @PathVariable String newName) {
         if (!"123456".equals(apiKey)) {
             throw new RuntimeException("Invalid API Key");
@@ -84,7 +87,7 @@ public class CustomerController {
 
     // delete customer
     @DeleteMapping("/customer/{customerName}")
-    public List<Customer> deleteCustomer(
+    public Customer deleteCustomer(
             @RequestHeader("API-Key") String apiKey,
             @PathVariable String customerName) {
         if (!"123456".equals(apiKey)) {
@@ -94,6 +97,8 @@ public class CustomerController {
         Logger myLogger = Logger.getLogger("CustomerController delete customer name");
         myLogger.info("Deleting customer name");
 
-        return customerService.deleteCustomer(customerName);
+        return customerService.deleteCustomer(customerName)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
     }
+
 }

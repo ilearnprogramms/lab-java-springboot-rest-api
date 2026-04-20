@@ -4,6 +4,7 @@ import com.SpringRestAPI.Models.Customer;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CustomerService {
@@ -29,9 +30,10 @@ public class CustomerService {
     }
 
     // add new customer
-    public String addNewCustomer(String customerName, String customerEmail, int customerAge, String customerAddress) {
-        customers.add(new Customer(customerName, customerEmail, customerAge, customerAddress));
-        return "new customer added";
+    public Customer addNewCustomer(String customerName, String customerEmail, int customerAge, String customerAddress) {
+        Customer newCustomer = new Customer(customerName, customerEmail, customerAge, customerAddress);
+        customers.add(newCustomer);
+        return newCustomer;
     }
 
     // get customer by email
@@ -57,13 +59,27 @@ public class CustomerService {
     }
 
     // delete customer
-    public List<Customer> deleteCustomer (String customerName){
-        for (Customer customer : customers) {
-            if (customer.getCustomerName().equals(customerName)) {
-                customers.remove(customer);
+    public Optional<Customer> deleteCustomer(String customerName) { /// Optional because we're deleting one
+        Optional<Customer> found = customers.stream() ///  This takes your list and turns into Stream.
+                /// Stream lets you process elements one by one instead of writing loops manually
+
+                .filter(p -> p.getCustomerName().equals(customerName))
+                ///  This keeps only the customers that match the name
+                ///  p -> ... lambda function (short version of a method)
+
+                .findFirst();
+                ///  Gives the first element from the filtered results.
+
+        found.ifPresent(customers::remove);
+        ///  if a product was found, then execute this code
+        ///  Long version:
+        /*
+            if (found.isPresent()) {
+        productList.remove(found.get());
             }
-        }
-        return customers;
+         */
+        return found;
+        ///  Returns results or Exception if not found
     }
 
 
